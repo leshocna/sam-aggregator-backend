@@ -47,33 +47,15 @@ def get_opportunities(
     if funding_agency:
         params["fundingAgency"] = funding_agency
 
-    try:
-        response = requests.get(base_url, headers=headers, params=params)
-        request_url = response.url
-        if response.status_code == 200:
-            data = response.json()
-            for item in data.get("opportunitiesData", []):
-                title = item.get("title", "").lower()
-                if "military construction" in title or "usace" in title or "milcon" in title:
-                    item["category"] = "MILCON"
-                else:
-                    item["category"] = "General"
-            return {
-                "request_url": request_url,
-                "params": params,
-                "data": data
-            }
-        else:
-            return {
-                "error": "Failed to fetch data from SAM.gov",
-                "status_code": response.status_code,
-                "request_url": request_url,
-                "params": params,
-                "response_body": response.text
-            }
-    except Exception as e:
-        return {
-            "error": "Exception occurred while fetching data",
-            "exception": str(e),
-            "params": params
-        }
+    response = requests.get(base_url, headers=headers, params=params)
+    if response.status_code == 200:
+        data = response.json()
+        for item in data.get("opportunitiesData", []):
+            title = item.get("title", "").lower()
+            if "military construction" in title or "usace" in title or "milcon" in title:
+                item["category"] = "MILCON"
+            else:
+                item["category"] = "General"
+        return data
+    else:
+        return {"error": "Failed to fetch data", "status_code": response.status_code}
