@@ -1,8 +1,8 @@
+from datetime import datetime, timedelta
+import os
+import requests
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
-import requests
-import os
-from datetime import datetime, timedelta
 
 app = FastAPI()
 
@@ -30,7 +30,15 @@ def get_opportunities(
     headers = {"X-API-KEY": SAM_API_KEY}
     base_url = "https://api.sam.gov/prod/opportunities/v2/search"
 
-    # Format postedFrom and postedTo as MM/dd/yyyy
+    # Default filters
+    default_naics = ["236220", "237310", "237990", "238110", "238120", "238190"]
+    default_states = ["PA", "VA", "DC"]
+    default_keywords = [
+        "concrete", "bridge", "paving", "culvert",
+        "military construction", "milcon", "usace", "UHPC"
+    ]
+
+    # Date range: last 30 days
     posted_to = datetime.utcnow()
     posted_from = posted_to - timedelta(days=30)
     posted_from_str = posted_from.strftime("%m/%d/%Y")
@@ -41,28 +49,42 @@ def get_opportunities(
         "noticeType": "Presolicitation,Combined Synopsis/Solicitation",
         "sort": "-publishedDate",
         "postedFrom": posted_from_str,
-        "postedTo": posted_to_str
+        "postedTo": posted_to_str,
+        "active": "Yes"
     }
 
+    # Apply filters
     if keyword:
         params["q"] = keyword
+    else:
+        params["q"] = " OR ".join(default_keywords)
+
     if agency:
         params["agency"] = agency
+
     if location:
         params["placeOfPerformance"] = location
+    else:
+        params["placeOfPerformance"] = ",".join(default_states)
+
     if naics:
         params["naics"] = naics
+    else:
+        params["naics"] = ",".join(default_naics)
+
     if solicitation_type:
         params["solicitationType"] = solicitation_type
+
     if funding_agency:
         params["fundingAgency"] = funding_agency
 
     response = requests.get(base_url, headers=headers, params=params)
+
     if response.status_code == 200:
         data = response.json()
         for item in data.get("opportunitiesData", []):
             title = item.get("title", "").lower()
-            if "military construction" in title or "usace" in title or "milcon" in title:
+            if any(kw in title for kw in ["military construction", "usace", "milcon"]):
                 item["category"] = "MILCON"
             else:
                 item["category"] = "General"
