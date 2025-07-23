@@ -83,11 +83,6 @@ def get_opportunities(
     if response.status_code == 200:
         data = response.json()
         for item in data.get("opportunitiesData", []):
-        item["description"] = item.get("description", "")
-        item["noticeId"] = item.get("noticeId", "")
-        item["naicsCode"] = item.get("naicsCode", "")
-        item["uiLink"] = item.get("uiLink", "")
-        item["typeOfSetAsideDescription"] = item.get("typeOfSetAsideDescription", "")
             title = item.get("title", "").lower()
             if any(kw in title for kw in ["military construction", "usace", "milcon"]):
                 item["category"] = "MILCON"
