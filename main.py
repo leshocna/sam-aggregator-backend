@@ -6,10 +6,13 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-# Enable CORS for frontend integration
+# Enable CORS for frontend integration with restricted origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://opportunity-radar-frontend.onrender.com",
+        "https://yourwixsite.wixsite.com"  # Replace with your actual Wix domain
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
