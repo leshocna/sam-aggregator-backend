@@ -3,6 +3,10 @@ import os
 import requests
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
+
+# Load environment variables from your local .env file
+load_dotenv(dotenv_path="opportunity-radar-frontend.env")
 
 app = FastAPI()
 
