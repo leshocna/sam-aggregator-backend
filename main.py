@@ -10,8 +10,9 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        "http://localhost:3000",
         "https://opportunity-radar-frontend.onrender.com",
-        "https://yourwixsite.wixsite.com"  # Replace with your actual Wix domain
+        "https://www.trustedstructuresllc.com"  # Replace with your actual Wix domain
     ],
     allow_credentials=True,
     allow_methods=["*"],
