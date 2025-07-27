@@ -33,15 +33,17 @@ def get_opportunities(
     naics: str = Query(None),
     solicitation_type: str = Query(None),
     funding_agency: str = Query(None),
-    limit: int = Query(20)
+    limit: int = Query(100)
 ):
     headers = {"X-API-KEY": SAM_API_KEY}
     base_url = "https://api.sam.gov/prod/opportunities/v2/search"
 
     # Default filters
-    default_naics = ["236220", "237310", "237990", "238110", "238120", "238190"]
+    default_naics = ["237310", "238110", "238120", "236220", "541330"]
     default_states = ["PA", "VA", "DC"]
-    default_keywords = ["concrete"]
+    default_keywords = [
+        "concrete",
+    ]
 
     # Date range: last 30 days
     posted_to = datetime.utcnow()
@@ -51,7 +53,7 @@ def get_opportunities(
 
     params = {
         "limit": limit,
-        "noticeType": "Presolicitation,Combined Synopsis/Solicitation",
+        "noticeType": "Presolicitation,Solicitation,Combined Synopsis/Solicitation",
         "sort": "-publishedDate",
         "postedFrom": posted_from_str,
         "postedTo": posted_to_str,
@@ -93,7 +95,13 @@ def get_opportunities(
                 item["category"] = "MILCON"
             else:
                 item["category"] = "General"
-        return data
+        
+        valid_naics = set(default_naics)
+        data["opportunitiesData"] = [
+            item for item in data.get("opportunitiesData", [])
+            if item.get("naicsCode") in valid_naics
+        ]
+return data
     else:
         return {
             "error": "Failed to fetch data from SAM.gov",
