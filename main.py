@@ -42,8 +42,7 @@ def get_opportunities(
     default_naics = ["236220", "237310", "237990", "238110", "238120", "238190"]
     default_states = ["PA", "VA", "DC"]
     default_keywords = [
-        "concrete", "bridge", "paving", "culvert",
-        "military construction", "milcon", "usace", "UHPC"
+        "concrete"
     ]
 
     # Date range: last 30 days
