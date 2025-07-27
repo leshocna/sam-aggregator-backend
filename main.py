@@ -1,3 +1,4 @@
+
 from datetime import datetime, timedelta
 import os
 import requests
@@ -5,18 +6,18 @@ from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
-# Load environment variables from your local .env file
+# Load environment variables
 load_dotenv(dotenv_path="opportunity-radar-frontend.env")
 
 app = FastAPI()
 
-# Enable CORS for frontend integration with restricted origins
+# Enable CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
         "https://opportunity-radar-frontend.onrender.com",
-        "https://www.trustedstructuresllc.com"  # Replace with your actual Wix domain
+        "https://www.trustedstructuresllc.com"
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -41,9 +42,7 @@ def get_opportunities(
     # Default filters
     default_naics = ["237310", "238110", "238120", "236220", "541330"]
     default_states = ["PA", "VA", "DC"]
-    default_keywords = [
-        "concrete",
-    ]
+    default_keywords = ["concrete"]
 
     # Date range: last 30 days
     posted_to = datetime.utcnow()
@@ -60,7 +59,6 @@ def get_opportunities(
         "active": "Yes"
     }
 
-    # Apply filters
     if keyword:
         params["q"] = keyword
     else:
@@ -89,19 +87,11 @@ def get_opportunities(
 
     if response.status_code == 200:
         data = response.json()
-        for item in data.get("opportunitiesData", []):
-            title = item.get("title", "").lower()
-            if any(kw in title for kw in ["military construction", "usace", "milcon"]):
-                item["category"] = "MILCON"
-            else:
-                item["category"] = "General"
-        
-        valid_naics = set(default_naics)
-        data["opportunitiesData"] = [
-            item for item in data.get("opportunitiesData", [])
-            if item.get("naicsCode") in valid_naics
+        filtered_opps = [
+            opp for opp in data.get("opportunitiesData", [])
+            if opp.get("naicsCode") in default_naics
         ]
-return data
+        return {"opportunitiesData": filtered_opps}
     else:
         return {
             "error": "Failed to fetch data from SAM.gov",
@@ -115,4 +105,4 @@ return data
 if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 10000))
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    uvicorn.run("main_v12:app", host="0.0.0.0", port=port, reload=True)
