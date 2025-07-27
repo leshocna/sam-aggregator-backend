@@ -10,6 +10,10 @@ load_dotenv(dotenv_path="opportunity-radar-frontend.env")
 
 app = FastAPI()
 
+app.get("/")
+def root():
+    return {"status": "Backend is live", "module": "Project Tell No One"}
+
 # Enable CORS
 app.add_middleware(
     CORSMiddleware,
