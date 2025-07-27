@@ -1,4 +1,3 @@
-
 from datetime import datetime, timedelta
 import os
 import requests
@@ -59,27 +58,13 @@ def get_opportunities(
         "active": "Yes"
     }
 
-    if keyword:
-        params["q"] = keyword
-    else:
-        params["q"] = " OR ".join(default_keywords)
-
+    params["q"] = keyword if keyword else " OR ".join(default_keywords)
     if agency:
         params["agency"] = agency
-
-    if location:
-        params["placeOfPerformance"] = location
-    else:
-        params["placeOfPerformance"] = ",".join(default_states)
-
-    if naics:
-        params["naics"] = naics
-    else:
-        params["naics"] = ",".join(default_naics)
-
+    params["placeOfPerformance"] = location if location else ",".join(default_states)
+    params["naics"] = naics if naics else ",".join(default_naics)
     if solicitation_type:
         params["solicitationType"] = solicitation_type
-
     if funding_agency:
         params["fundingAgency"] = funding_agency
 
