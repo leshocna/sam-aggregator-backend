@@ -77,7 +77,7 @@ def get_opportunities(
         filtered_opps = [
             opp for opp in data.get("opportunitiesData", [])
             if opp.get("naicsCode") in default_naics and
-               any(state in opp.get("placeOfPerformance", "") for state in default_states)
+               any(state in opp.get("placeOfPerformance", ""). upper() for state in default_states)
 
         ]
         return {"opportunitiesData": filtered_opps}
