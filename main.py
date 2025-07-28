@@ -31,7 +31,6 @@ SAM_API_KEY = os.getenv("SAM_API_KEY")
 
 @app.get("/opportunities")
 def get_opportunities(
-    keyword: str = Query(None),
     agency: str = Query(None),
     location: str = Query(None),
     naics: str = Query(None),
@@ -45,7 +44,7 @@ def get_opportunities(
     # Default filters
     default_naics = ["237310", "238110", "238120", "236220", "541330"]
     default_states = ["PA", "VA", "DC"]
-    default_keywords = ["concrete"]
+    
 
     # Date range: last 30 days
     posted_to = datetime.utcnow()
@@ -62,8 +61,6 @@ def get_opportunities(
         "active": "Yes"
     }
 
-    # Always use 'concrete' as the keyword
-    params["q"] = "concrete"
     if agency:
         params["agency"] = agency
     params["placeOfPerformance"] = location if location else ",".join(default_states)
@@ -79,7 +76,9 @@ def get_opportunities(
         data = response.json()
         filtered_opps = [
             opp for opp in data.get("opportunitiesData", [])
-            if opp.get("naicsCode") in default_naics
+            if opp.get("naicsCode") in default_naics and
+               any(state in opp.get("placeOfPerformance", "") for state in default_states)
+
         ]
         return {"opportunitiesData": filtered_opps}
     else:
