@@ -1,3 +1,4 @@
+
 from datetime import datetime, timedelta
 import os
 import requests
@@ -10,15 +11,14 @@ load_dotenv(dotenv_path="opportunity-radar-frontend.env")
 
 app = FastAPI()
 
-app.get("/")
+@app.get("/")
 def root():
     return {"status": "Backend is live", "module": "Project Tell No One"}
-    
+
 # Enable CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:3000",
         "https://opportunity-radar-frontend.onrender.com",
         "https://www.trustedstructuresllc.com"
     ],
@@ -37,7 +37,7 @@ def get_opportunities(
     naics: str = Query(None),
     solicitation_type: str = Query(None),
     funding_agency: str = Query(None),
-    limit: int = Query(100)
+    limit: int = Query(200)
 ):
     headers = {"X-API-KEY": SAM_API_KEY}
     base_url = "https://api.sam.gov/prod/opportunities/v2/search"
@@ -62,7 +62,8 @@ def get_opportunities(
         "active": "Yes"
     }
 
-    params["q"] = keyword if keyword else " OR ".join(default_keywords)
+    # Always use 'concrete' as the keyword
+    params["q"] = "concrete"
     if agency:
         params["agency"] = agency
     params["placeOfPerformance"] = location if location else ",".join(default_states)
